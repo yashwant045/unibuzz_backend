@@ -1,40 +1,57 @@
 package com.unibuzz.crm.service;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class EmailService {
 
-    private final JavaMailSender javaMailSender;
+    @Value("${brevo.api.key:}")
+    private String brevoApiKey;
 
     @Value("${spring.mail.username:crackthecode46@gmail.com}")
     private String fromEmail;
 
+    private final RestTemplate restTemplate = new RestTemplate();
+
     public void sendHtmlEmail(String to, String subject, String htmlBody) {
+        if (brevoApiKey == null || brevoApiKey.isBlank()) {
+            log.warn("BREVO_API_KEY is not set. Please get a free API key from brevo.com and add it to your environment variables. Email not sent to " + to);
+            return;
+        }
+
         try {
-            MimeMessage message = javaMailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            if (fromEmail != null && !fromEmail.isBlank()) {
-                helper.setFrom(fromEmail, "Unibuzz Notifications");
-            }
-            helper.setTo(to);
-            helper.setSubject(subject);
-            helper.setText(htmlBody, true);
+            String url = "https://api.brevo.com/v3/smtp/email";
             
-            // Commenting out the actual send call during development if credentials aren't set
-            // to avoid errors in logs. But we'll leave it in for the real implementation.
-            javaMailSender.send(message);
-            log.info("Email sent to: " + to + " with subject: " + subject);
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("accept", "application/json");
+            headers.set("api-key", brevoApiKey);
+            headers.set("content-type", "application/json");
+
+            Map<String, Object> body = new HashMap<>();
+            body.put("sender", Map.of("name", "Unibuzz", "email", fromEmail));
+            body.put("to", List.of(Map.of("email", to)));
+            body.put("subject", subject);
+            body.put("htmlContent", htmlBody);
+
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+            log.info("Email sent to: " + to + " via Brevo. Response: " + response.getStatusCode());
         } catch (Exception e) {
             log.error("Failed to send email to " + to, e);
         }
