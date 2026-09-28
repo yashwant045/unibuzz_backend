@@ -20,7 +20,6 @@ public class EmailService {
     @Value("${spring.mail.username:crackthecode46@gmail.com}")
     private String fromEmail;
 
-    @Async
     public void sendHtmlEmail(String to, String subject, String htmlBody) {
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
@@ -41,6 +40,7 @@ public class EmailService {
         }
     }
 
+    @Async
     public void sendNewEventNotification(String to, String eventTitle, String eventDate, String location) {
         String subject = "New Event: " + eventTitle;
         String body = "<h3>A new event has been scheduled!</h3>"
@@ -51,6 +51,7 @@ public class EmailService {
         sendHtmlEmail(to, subject, body);
     }
 
+    @Async
     public void sendEventUpdateNotification(String to, String eventTitle, String eventDate, String location, String description, String category) {
         String subject = "📢 Event Update Notice: " + eventTitle;
         String body = "<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;\">"
@@ -72,6 +73,7 @@ public class EmailService {
         sendHtmlEmail(to, subject, body);
     }
 
+    @Async
     public void sendEventCancellationNotification(String to, String eventTitle) {
         String subject = "⚠️ Event Cancelled: " + eventTitle;
         String body = "<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #fee2e2; border-radius: 12px; background-color: #ffffff;\">"
@@ -86,6 +88,7 @@ public class EmailService {
         sendHtmlEmail(to, subject, body);
     }
 
+    @Async
     public void sendUpcomingEventReminder(String to, String eventTitle, String eventDate, String location) {
         String subject = "Reminder: Upcoming Event Tomorrow - " + eventTitle;
         String body = "<h3>Friendly Reminder!</h3>"
@@ -96,6 +99,7 @@ public class EmailService {
         sendHtmlEmail(to, subject, body);
     }
 
+    @Async
     public void sendVerificationOtp(String to, String otp) {
         String subject = "Verify Your Unibuzz Account";
         String body = "<div style=\"font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;\">"
@@ -109,6 +113,7 @@ public class EmailService {
         sendHtmlEmail(to, subject, body);
     }
 
+    @Async
     public void sendPasswordResetOtp(String to, String otp) {
         String subject = "Password Reset Request - Unibuzz";
         String body = "<div style=\"font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;\">"
