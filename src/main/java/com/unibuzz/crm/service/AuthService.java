@@ -95,6 +95,14 @@ public class AuthService {
                 .verificationOtp(otp)
                 .otpExpiry(LocalDateTime.now().plusMinutes(15))
                 .roles(roles)
+                .enrollmentNumber(request.getEnrollmentNumber())
+                .phoneNumber(request.getPhoneNumber())
+                .department(request.getDepartment())
+                .section(request.getSection())
+                .year(request.getYear())
+                .designation(request.getDesignation())
+                .expertise(request.getExpertise())
+                .officeLocation(request.getOfficeLocation())
                 .build();
 
         userRepository.save(user);
